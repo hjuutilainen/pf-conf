@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# ==============================================================================
+#   Preflight script for pf-configuration installer
+#
+#   Copyright 2012 Hannes Juutilainen <hjuutilainen@mac.com>
+#   https://github.com/hjuutilainen/pf-conf
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+# ==============================================================================
+
+ITEM_NAME="com.github.hjuutilainen.pf"
+NOW=$(date +"%Y-%m-%d-%H%M%S")
+LAUNCHCTL="/bin/launchctl"
+PF_LAUNCH_DAEMON="$3/Library/LaunchDaemons/$ITEM_NAME.plist"
+BACKUP_DIR="$3/var/backups/$ITEM_NAME-$NOW"
+mkdir $BACKUP_DIR
+
+# =================================================
+# Define the items to backup
+# =================================================
+FILES_TO_BACKUP=(
+"$3/etc/com.github.hjuutilainen.pf.conf"
+"$3/etc/pf.anchors/com.github.hjuutilainen.pf.rules"
+"$3/etc/pf.anchors/com.github.hjuutilainen.pf.macros"
+"$3/etc/pf.anchors/com.github.hjuutilainen.pf.custom"
+"$3/etc/pf.conf"
+PF_LAUNCH_DAEMON
+)
+DIRECTORIES_TO_BACKUP=(
+"$3/etc/pf.anchors/com.github.hjuutilainen.pf.d"
+)
+
+# =================================================
+# Backup
+# =================================================
+for A_FILE in "${FILES_TO_BACKUP[@]}"
+do
+	if [[ -f "$A_FILE" ]]; then
+    	echo "$SCRIPT_NAME: Backing up $A_FILE to $BACKUP_DIR/"
+    	cp "$A_FILE" "$BACKUP_DIR/"
+	fi
+done
+
+for A_DIRECTORY in "${DIRECTORIES_TO_BACKUP[@]}"
+do
+	if [[ -d "$A_DIRECTORY" ]]; then
+    	echo "$SCRIPT_NAME: Backing up $A_DIRECTORY to $BACKUP_DIR/$NOW-$A_DIRECTORY"
+    	cp -R "$A_DIRECTORY" "$BACKUP_DIR/"
+	fi
+done
+
+# =================================================
+# Unload the launchd item
+# =================================================
+if [[ -f "$PF_LAUNCH_DAEMON" ]]; then
+	$LAUNCHCTL list $ITEM_NAME
+	if [[ $? -eq 0 ]]; then
+		$LAUNCHCTL unload -w $PF_LAUNCH_DAEMON
+	fi
+fi
+
+exit 0

@@ -1,0 +1,53 @@
+# =====================================================
+#   com.github.hjuutilainen.pf.rules
+#
+#   Packet Filter defaults
+#
+#   Hannes Juutilainen <hjuutilainen@mac.com>
+#   https://github.com/hjuutilainen/pf-conf
+# =====================================================
+
+# =====================================================
+#   Macros
+# =====================================================
+include "/etc/pf.anchors/com.github.hjuutilainen.pf.macros"
+
+# =====================================================
+#   Filter rules
+# =====================================================
+
+# Don't filter on the loopback interface
+set skip on lo0
+
+# Scrub incoming packets
+scrub in all no-df
+
+# Antispoof
+antispoof quick for en0
+antispoof quick	for (en1)
+
+# Block by default
+block in
+
+# Allow outgoing
+pass out quick
+
+# Allow DHCP
+pass in quick inet proto udp from any port 67 to any port 68
+
+# Allow icmp from LAN
+pass in log proto icmp from <lan_safe>
+
+# Allow everything from admin workstations
+# pass in log quick from <admin_workstations>
+
+# Allow everything from admin VPN connections
+# pass in log quick from $admin_vpns
+
+# Allow all from trusted servers
+# pass in log quick from $trusted_servers
+
+#
+# Custom rules anchor
+#
+anchor "custom"

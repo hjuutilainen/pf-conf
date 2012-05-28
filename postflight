@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# ==============================================================================
+#   Postflight script for pf-configuration installer
+#
+#   Copyright 2012 Hannes Juutilainen <hjuutilainen@mac.com>
+#   https://github.com/hjuutilainen/pf-conf
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+# ==============================================================================
+
+echo $SCRIPT_NAME: Starting
+
+# ===========================================
+# Create a rule template if it doesn't exist
+# ===========================================
+CUSTOM_RULE_FILE="$3/etc/pf.anchors/com.github.hjuutilainen.pf.custom"
+if [[ ! -f $CUSTOM_RULE_FILE ]]; then
+    echo $SCRIPT_NAME: Creating example custom rules file $CUSTOM_RULE_FILE
+    echo "# =====================================" >> $CUSTOM_RULE_FILE
+    echo "# Custom rules for pf firewall" >> $CUSTOM_RULE_FILE
+    echo "# Macros: /etc/pf.anchors/com.github.hjuutilainen.pf.macros"
+    echo "# =====================================" >> $CUSTOM_RULE_FILE
+    echo "" >> $CUSTOM_RULE_FILE
+    echo "# Example rule" >> $CUSTOM_RULE_FILE
+    echo "# pass in proto tcp from <lan_safe> to port 22" >> $CUSTOM_RULE_FILE
+    echo "" >> $CUSTOM_RULE_FILE
+fi
+
+# ============================================
+# Create a directory for other custom files
+# ============================================
+CUSTOM_RULE_DIR="$3/etc/pf.anchors/com.github.hjuutilainen.pf.d"
+if [[ ! -d "$CUSTOM_RULE_DIR" ]]; then
+    mkdir "$CUSTOM_RULE_DIR"
+    chown root:wheel "$CUSTOM_RULE_DIR"
+    chmod 755 "$CUSTOM_RULE_DIR"
+fi
+
+# ============================================
+# Start if installed on startup volume
+# ============================================
+if [[ "$3" == "/" ]]; then
+    echo $SCRIPT_NAME: Installed on startup volume
+    echo $SCRIPT_NAME: Starting firewall
+    if [[ -f "/usr/local/bin/pf-restart.sh" ]]; then
+		/usr/local/bin/pf-restart.sh
+    fi
+else
+    echo $SCRIPT_NAME: Installed on non-startup volume
+    echo $SCRIPT_NAME: Skipping firewall startup
+fi
+
+echo $SCRIPT_NAME: Done
+
+exit 0

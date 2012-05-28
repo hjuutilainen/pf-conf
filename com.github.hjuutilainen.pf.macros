@@ -1,0 +1,18 @@
+# =====================================================
+#   com.github.hjuutilainen.pf.macros
+#
+#   Macros for Packet Filter
+#
+#   Hannes Juutilainen <hjuutilainen@mac.com>
+#   https://github.com/hjuutilainen/pf-conf
+#
+#   History:
+#   2012-05-28 Hannes Juutilainen: Initial Version
+# =====================================================
+
+lan_full            = "10.0.0.0/16"
+admin_vpns          = "10.0.123.0/26"
+admin_workstations  = "10.0.124.0/26"
+trusted_servers     = "{ 10.0.0.2, 10.0.0.3 }"
+
+table <lan_safe> { $lan_full, !10.0.15.0/21 }
