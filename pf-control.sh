@@ -130,7 +130,7 @@ function enablePfctl () {
     $ECHO ""
     $ECHO "Starting Packet Filter and reading default rules"
     $PFCTL -E > /dev/null 2>&1
-    $PFCTL -f /etc/com.github.hjuutilainen.pf.conf > /dev/null 2>&1
+    $PFCTL -Fa -f /etc/com.github.hjuutilainen.pf.conf > /dev/null 2>&1
 }
 
 # ========================================
